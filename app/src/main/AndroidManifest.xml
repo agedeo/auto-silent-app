@@ -47,6 +47,11 @@
         <activity android:name=".SettingsActivity" android:screenOrientation="portrait"/>
         <activity android:name=".GeofenceListActivity" android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".PrivacyActivity"
+            android:label="Privacy"
+            android:parentActivityName=".SettingsActivity" />
+
         <receiver android:name=".GeofenceBroadcastReceiver" android:exported="true" />
 
     </application>

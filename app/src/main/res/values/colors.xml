@@ -1,28 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 
-    <color name="app_background">#000000</color>
-    <color name="card_background">#1C1C1C</color>
+    <color name="colorPrimary">#BB86FC</color>
+    <color name="colorPrimaryVariant">#3700B3</color>
+    <color name="colorOnPrimary">#000000</color>
 
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#E0E0E0</color>
+    <color name="colorSecondary">#03DAC6</color>
+    <color name="colorOnSecondary">#000000</color>
+    <color name="colorSecondaryVariant">#018786</color>
 
-    <color name="status_normal_bg">#000000</color>
-    <color name="status_silent_bg">#1A1A1A</color>
-    <color name="status_manual_bg">#3E2723</color>
+    <color name="background_main">#121212</color>
+    <color name="surface_card">#1E1E1E</color>
+    <color name="divider">#2C2C2C</color>
 
-    <color name="status_normal_text">#00E676</color>
-    <color name="status_silent_text">#80D8FF</color>
-    <color name="status_manual_text">#FFAB40</color>
+    <color name="text_primary">#DEFFFFFF</color>
+    <color name="text_secondary">#99FFFFFF</color>
 
-    <color name="color_success">#00E676</color>
-    <color name="color_error">#FF5252</color>
-    <color name="color_warning">#FFD740</color>
+    <color name="status_normal_bg">#121212</color>
+    <color name="status_normal_text">#A5D6A7</color>
+    <color name="status_silent_bg">#2B1212</color>
+    <color name="status_silent_text">#EF9A9A</color>
+    <color name="status_manual_bg">#0D1520</color>
+    <color name="status_manual_text">#90CAF9</color>
 
-    <color name="button_dark_bg">#333333</color>
+    <color name="button_dark_bg">#2D2D2D</color>
+    <color name="color_success">#81C784</color>
+    <color name="color_warning">#FFB74D</color>
+    <color name="color_error">#E57373</color>
+
+    <color name="purple_500">@color/colorPrimary</color>
+    <color name="purple_700">@color/colorPrimaryVariant</color>
+    <color name="purple_200">@color/colorPrimary</color>
+
+    <color name="teal_200">@color/colorSecondary</color>
+    <color name="teal_700">@color/colorSecondaryVariant</color>
+
+    <color name="app_background">@color/background_main</color>
 </resources>

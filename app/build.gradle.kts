@@ -11,9 +11,9 @@ android {
     defaultConfig {
         applicationId = "nl.deluxeweb.silentmode"
         minSdk = 31
-        targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        targetSdk = 35
+        versionCode = 4
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

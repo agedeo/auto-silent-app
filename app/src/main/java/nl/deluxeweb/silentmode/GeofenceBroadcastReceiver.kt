@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.CombinedVibration
-import android.os.VibrationAttributes // <--- DIT IS DE NIEUWE KLASSE
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.preference.PreferenceManager
@@ -17,9 +17,10 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val isManualMode = prefs.getBoolean("manual_override", false)
 
-        if (isManualMode) return
+        // CHECK: Staan we wel op AUTO?
+        val overrideMode = prefs.getString("override_mode", "AUTO")
+        if (overrideMode != "AUTO") return
 
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent == null || geofencingEvent.hasError()) return
@@ -52,10 +53,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         when (transition) {
             Geofence.GEOFENCE_TRANSITION_ENTER, Geofence.GEOFENCE_TRANSITION_DWELL -> {
-                // ACTIE 1: TRILLEN
                 vibrateModern(context, longArrayOf(0, 200, 100, 200))
 
-                // ACTIE 2: STIL
                 silentManager.setSilentMode()
                 prefs.edit().putBoolean("state_active_by_app", true).apply()
 
@@ -66,14 +65,13 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 uiUpdateIntent.putExtra("LOC_ID", locationId)
             }
             Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                // ACTIE 1: GELUID AAN
                 silentManager.setNormalMode()
                 prefs.edit().putBoolean("state_active_by_app", false).apply()
 
-                // ACTIE 2: TRILLEN
                 vibrateModern(context, longArrayOf(0, 500))
 
-                SilentService.updateNotification(context, "🟢 AutoStil is actief", R.drawable.ic_sound_on)
+                // NIEUW: Duidelijkere tekst
+                SilentService.updateNotification(context, context.getString(R.string.notification_standby), R.drawable.ic_sound_on)
 
                 uiUpdateIntent.putExtra("MODE", "NORMAL")
             }
@@ -87,14 +85,11 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             val effect = VibrationEffect.createWaveform(pattern, -1)
             val combinedEffect = CombinedVibration.createParallel(effect)
-
-            // DE FIX: Gebruik VibrationAttributes i.p.v. AudioAttributes
             val attributes = VibrationAttributes.Builder()
-                .setUsage(VibrationAttributes.USAGE_ALARM) // Dit forceert trillen, ook in stiltemodus
+                .setUsage(VibrationAttributes.USAGE_ALARM)
                 .build()
 
             vibratorManager.vibrate(combinedEffect, attributes)
-
         } catch (e: Exception) {
             e.printStackTrace()
         }

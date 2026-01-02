@@ -32,6 +32,9 @@ class WizardActivity : AppCompatActivity() {
     private lateinit var imgStateBat: ImageView
     private lateinit var btnIgnoreBattery: Button
 
+    // Nieuwe knop voor Safe Zone
+    private lateinit var btnScanSafeZone: Button
+
     // Checkboxes voor Categorieën
     private lateinit var chkChurch: CheckBox
     private lateinit var chkTheater: CheckBox
@@ -68,6 +71,12 @@ class WizardActivity : AppCompatActivity() {
         btnIgnoreBattery = findViewById(R.id.btnIgnoreBattery)
         btnIgnoreBattery.setOnClickListener { askBattery() }
 
+        // Koppel de nieuwe scan knop
+        btnScanSafeZone = findViewById(R.id.btnScanSafeZone)
+        btnScanSafeZone.setOnClickListener {
+            SafeZoneHelper(this).scanAndIgnoreCurrentLocation()
+        }
+
         // Binden van Checkboxes
         chkChurch = findViewById(R.id.chkChurch)
         chkTheater = findViewById(R.id.chkTheater)
@@ -84,7 +93,8 @@ class WizardActivity : AppCompatActivity() {
 
         spinnerRadius.setSelection(1) // Default op 100m
 
-        btnNext.setOnClickListener { if (currentStep == 4) finishWizard() else nextStep() }
+        // Let op: Max stap is nu 5 (omdat we Safe Zone hebben toegevoegd)
+        btnNext.setOnClickListener { if (currentStep == 5) finishWizard() else nextStep() }
         updateUI()
     }
 
@@ -100,22 +110,29 @@ class WizardActivity : AppCompatActivity() {
                 lblStepTitle.text = "Welkom"
                 btnNext.text = "Starten"
                 btnNext.isEnabled = true
+                btnNext.setBackgroundColor(Color.parseColor("#2196F3"))
             }
             1 -> {
-                lblStepTitle.text = "Stap 1/4"
+                lblStepTitle.text = "Stap 1/5"
                 btnNext.text = "Volgende"
                 checkLocationState()
             }
             2 -> {
-                lblStepTitle.text = "Stap 2/4"
+                lblStepTitle.text = "Stap 2/5"
                 checkDndState()
             }
             3 -> {
-                lblStepTitle.text = "Stap 3/4"
+                lblStepTitle.text = "Stap 3/5"
                 checkBatState()
             }
-            4 -> {
-                lblStepTitle.text = "Stap 4/4"
+            4 -> { // Safe Zone Stap
+                lblStepTitle.text = "Stap 4/5"
+                btnNext.text = "Volgende (Overslaan)"
+                btnNext.isEnabled = true
+                btnNext.setBackgroundColor(Color.parseColor("#2196F3"))
+            }
+            5 -> { // Categorieën
+                lblStepTitle.text = "Stap 5/5"
                 btnNext.text = "Klaar!"
                 btnNext.isEnabled = true
                 btnNext.setBackgroundColor(Color.parseColor("#4CAF50"))
@@ -126,7 +143,7 @@ class WizardActivity : AppCompatActivity() {
     private fun nextStep() {
         if (currentStep == 1 && !isLocationComplete()) return
         if (currentStep == 2 && !hasDndPermission()) return
-        if (currentStep < 4) {
+        if (currentStep < 5) {
             currentStep++
             updateUI()
         }
@@ -221,8 +238,6 @@ class WizardActivity : AppCompatActivity() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = prefs.edit()
 
-        // Sla actieve categorieën op als Set
-        // Let op: De strings hier moeten exact matchen met builder.py
         val activeCats = mutableSetOf<String>()
         if (chkChurch.isChecked) activeCats.add("church")
         if (chkTheater.isChecked) activeCats.add("theater")

@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Stap 1/4"
+        android:text="Welkom"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
@@ -25,22 +25,39 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
+
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:src="@mipmap/ic_launcher_round"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welkom bij AutoStil"
+                android:text="@string/wizard_welcome_title"
                 android:textSize="24sp"
+                android:textStyle="bold"
                 android:layout_marginTop="16dp"/>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="We gaan je helpen alles in te stellen."
-                android:layout_marginTop="8dp"/>
+                android:text="@string/wizard_welcome_text"
+                android:textAlignment="center"
+                android:layout_marginTop="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wizard_disclaimer"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:textAlignment="center"
+                android:layout_marginTop="32dp"
+                android:padding="12dp"
+                android:background="#F0F0F0"/>
         </LinearLayout>
 
         <LinearLayout
@@ -131,6 +148,36 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Voorkom Slapen"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏠 Thuis &amp; Werk"
+                android:textSize="24sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Veilige Zones"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Woon je naast een kerk of werk je in een ziekenhuis? Scan je omgeving om te voorkomen dat je telefoon daar stil wordt."
+                android:gravity="center"
+                android:layout_margin="16dp"/>
+            <Button
+                android:id="@+id/btnScanSafeZone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔍 Scan en Negeer Omgeving"/>
         </LinearLayout>
 
         <ScrollView
@@ -229,7 +276,7 @@
                     android:id="@+id/spinnerRadius"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/radius_values"/>
+                    android:entries="@array/radius_entries"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -240,7 +287,7 @@
                     android:id="@+id/spinnerDelay"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/delay_values"/>
+                    android:entries="@array/delay_entries"/>
 
             </LinearLayout>
         </ScrollView>
@@ -250,7 +297,7 @@
         android:id="@+id/btnNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Volgende"
+        android:text="@string/btn_agree_start"
         android:layout_marginTop="16dp"/>
 
 </LinearLayout>

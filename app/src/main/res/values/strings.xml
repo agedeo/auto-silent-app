@@ -1,52 +1,61 @@
 <resources>
     <string name="app_name">AutoStil</string>
+    <string name="loading">Laden...</string>
 
-    <string name="title_activity_settings">Instellingen</string>
-    <string name="btn_back">Terug</string>
-    <string name="loading">Even geduld...</string>
+    <string name="notif_channel_name">AutoStil Status</string>
 
-    <string name="status_sound_on">GELUID AAN</string>
-    <string name="status_sound_off">STILTEMODUS</string>
-    <string name="status_forced_sound">HANDMATIG AAN</string>
-    <string name="status_forced_silent">HANDMATIG STIL</string>
+    <string name="status_sound_on">Geluid Aan</string>
+    <string name="status_sound_off">Stil</string>
+    <string name="status_forced_sound">Geforceerd: Geluid</string>
+    <string name="status_forced_silent">Geforceerd: Stil</string>
 
-    <string name="loc_searching">Locatie zoeken...</string>
-    <string name="loc_none">Geen stille plek in de buurt</string>
-    <string name="loc_at">Je bent bij: %1$s</string>
-    <string name="loc_manual">⚠️ HANDBEDIENING</string>
+    <string name="loc_searching">Zoeken...</string>
+    <string name="loc_none">Geen zone in de buurt</string>
+    <string name="loc_at">Bij: %1$s</string>
+    <string name="loc_manual">Handmatige Modus</string>
 
-    <string name="btn_manual_start">Zelf regelen ✋</string>
-    <string name="btn_manual_stop">Weer automatisch 🔄</string>
-
-    <string name="settings_header_check">Systeem Controle</string>
-    <string name="check_location_ok">✅ Locatie werkt goed</string>
-    <string name="check_location_bad">❌ Locatie toegang ontbreekt</string>
-    <string name="check_dnd_ok">✅ App mag geluid dempen</string>
-    <string name="check_dnd_bad">❌ App mag geluid NIET dempen</string>
-    <string name="check_bat_ok">✅ Batterij staat goed ingesteld</string>
-    <string name="check_bat_bad">⚠️ Let op: Batterij besparing staat aan</string>
-
-    <string name="settings_header_location">Waar ben ik?</string>
-    <string name="address_unknown">Adres onbekend</string>
-    <string name="gps_searching">GPS signaal zoeken...</string>
-    <string name="btn_show_list">Bekijk opgeslagen plekken 📍</string>
-
-    <string name="notif_channel_name">Stilte Meldingen</string>
-    <string name="notif_enter_title">Sssst! 🤫</string>
-    <string name="notif_enter_text">Telefoon op stil gezet bij: %1$s</string>
-    <string name="notif_exit_title">Vrijheid 🔊</string>
-    <string name="notif_exit_text">Je hebt %1$s verlaten. Geluid weer aan.</string>
-
-    <string name="cat_church">⛪ Religie (Kerken/Moskeeën)</string>
-    <string name="cat_theater">🎭 Theaters &amp; Podia</string>
-    <string name="cat_cinema">🍿 Bioscopen</string>
-    <string name="cat_library">📚 Bibliotheken</string>
-    <string name="cat_museum">🖼️ Musea</string>
-    <string name="cat_community">🤝 Buurthuizen</string>
-    <string name="cat_cemetery">🕯️ Begraafplaatsen &amp; Uitvaart</string>
-    <string name="cat_hospital">🏥 Ziekenhuizen</string>
-    <string name="cat_government">⚖️ Overheid (Rechtbank/Gemeente)</string>
+    <string name="cat_church">Kerk</string>
+    <string name="cat_theater">Theater</string>
+    <string name="cat_cinema">Bioscoop</string>
+    <string name="cat_library">Bibliotheek</string>
+    <string name="cat_cemetery">Begraafplaats</string>
+    <string name="cat_museum">Museum</string>
+    <string name="cat_community">Buurthuis</string>
+    <string name="cat_hospital">Ziekenhuis</string>
+    <string name="cat_government">Gemeentehuis</string>
 
     <string name="pref_cat_title">Actieve Categorieën</string>
     <string name="pref_cat_summary">Kies waar je telefoon stil moet worden</string>
+
+    <string name="btn_manual_start">Handmatig Starten</string>
+    <string name="btn_manual_stop">Hervat Auto</string>
+    <string name="btn_ignore">Locatie Negeren</string>
+    <string name="btn_open_settings">⚙️ Instellingen &amp; Status</string>
+
+    <string name="settings_header_check">🔍 Status Controles</string>
+    <string name="check_location_ok">✅ Locatie: OK</string>
+    <string name="check_location_bad">❌ Locatie: Geen toegang</string>
+    <string name="check_dnd_ok">✅ Niet Storen: OK</string>
+    <string name="check_dnd_bad">❌ Niet Storen: Geen toegang</string>
+    <string name="check_bat_ok">✅ Batterij: OK</string>
+    <string name="check_bat_bad">⚠️ Batterij: Kan slapen</string>
+
+    <string name="settings_header_location">📍 Live Locatie Check</string>
+    <string name="gps_searching">GPS Zoeken...</string>
+    <string name="address_unknown">Adres onbekend</string>
+    <string name="btn_show_list">Bekijk Actieve Zones</string>
+    <string name="btn_clear_list">Genegeerde Lijst Wissen</string>
+
+    <string name="pref_dnd_settings_title">⚙️ Android \'Niet Storen\' Instellingen</string>
+    <string name="pref_dnd_settings_summary">Bepaal wat er wel/niet doorheen mag (Wekkers, Favorieten)</string>
+
+    <string name="notification_standby">AutoStil: Stand-by 🟢</string>
+    <string name="mode_auto">Slim</string>
+    <string name="mode_sound">Geluid</string>
+    <string name="mode_silent">Stil</string>
+
+    <string name="wizard_welcome_title">Welkom bij AutoStil</string>
+    <string name="wizard_welcome_text">Deze app zet je telefoon automatisch op stil bij kerken, theaters en ziekenhuizen.\n\nLaten we de app instellen in 5 simpele stappen.</string>
+    <string name="wizard_disclaimer">⚠️ Disclaimer: AutoStil is een hulpmiddel op basis van GPS. U blijft altijd zelf eindverantwoordelijk voor uw geluidsinstellingen en bereikbaarheid. De makers zijn niet aansprakelijk voor gemiste oproepen of ongewenst geluid.</string>
+    <string name="btn_agree_start">Akkoord &amp; Starten</string>
 </resources>

@@ -1,83 +1,95 @@
 package nl.deluxeweb.silentmode
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import androidx.preference.PreferenceManager
 
 class SilentService : Service() {
 
-    companion object {
-        const val CHANNEL_ID = "autostil_foreground_channel"
-        const val NOTIFICATION_ID = 1337
-
-        // CENTRALE FUNCTIE: Deze regelt de updates vanuit de hele app
-        fun updateNotification(context: Context, text: String, iconRes: Int) {
-            // 1. Opslaan in geheugen (zodat hij na herstart bewaard blijft)
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            prefs.edit()
-                .putString("last_notif_text", text)
-                .putInt("last_notif_icon", iconRes)
-                .apply()
-
-            // 2. Direct de melding updaten
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("AutoStil")
-                .setContentText(text)
-                .setSmallIcon(iconRes)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true)
-                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-                .build()
-
-            notificationManager.notify(NOTIFICATION_ID, notification)
-        }
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        createNotificationChannel()
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // AANGEPAST: Lees eerst de laatst bekende status!
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val savedText = prefs.getString("last_notif_text", "🟢 AutoStil is actief")
-        val savedIcon = prefs.getInt("last_notif_icon", R.drawable.ic_sound_on)
-
-        // Bouw de notificatie met de OPGESLAGEN tekst
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("AutoStil")
-            .setContentText(savedText)
-            .setSmallIcon(savedIcon)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
-        } else {
-            startForeground(NOTIFICATION_ID, notification)
-        }
-
+        createNotificationChannel()
+        // Start met een standaard lege notificatie om crash te voorkomen
+        startForeground(1, buildStaticNotification(this, getString(R.string.notification_standby), R.drawable.ic_sound_on, null, null))
         return START_STICKY
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "AutoStil Status", NotificationManager.IMPORTANCE_LOW)
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
+            val serviceChannel = NotificationChannel(
+                CHANNEL_ID,
+                getString(R.string.notif_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Toont de huidige status van AutoStil"
+                setShowBadge(false)
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(serviceChannel)
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    companion object {
+        const val CHANNEL_ID = "SilentModeChannel"
+
+        // Deze functie roep je aan vanuit MainActivity om de tekst (en promo) te updaten
+        fun updateNotification(context: Context, text: String, iconRes: Int, promoText: String? = null, promoUrl: String? = null) {
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            // We bouwen de notificatie via de helper functie
+            val notification = buildStaticNotification(context, text, iconRes, promoText, promoUrl)
+
+            nm.notify(1, notification)
+        }
+
+        // Statische helper om de notificatie te bouwen (zodat we geen instance van Service nodig hebben)
+        fun buildStaticNotification(context: Context, text: String, iconRes: Int, promoText: String?, promoUrl: String?): Notification {
+            val intent = Intent(context, MainActivity::class.java)
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+            val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(iconRes)
+                .setContentTitle(context.getString(R.string.app_name))
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+
+            // LOGICA VOOR PROMOTIES
+            val style = NotificationCompat.BigTextStyle()
+
+            if (promoText != null) {
+                // Als er reclame is: Titel = Locatie, Tekst = Promo
+                builder.setContentTitle(text)
+                builder.setContentText(promoText)
+                style.bigText(promoText)
+                style.setSummaryText("Aanbieding") // Klein tekstje bovenin
+
+                // Voeg knop toe als er een URL is
+                if (promoUrl != null) {
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(promoUrl))
+                    val browserPendingIntent = PendingIntent.getActivity(
+                        context,
+                        text.hashCode(), // Unieke ID per locatie om conflict te voorkomen
+                        browserIntent,
+                        PendingIntent.FLAG_IMMUTABLE
+                    )
+                    // Icoon, Tekst, Actie
+                    builder.addAction(android.R.drawable.ic_menu_view, "Bekijk Actie", browserPendingIntent)
+                }
+            } else {
+                // Geen reclame: Standaard weergave
+                builder.setContentText(text)
+                style.bigText(text)
+            }
+
+            builder.setStyle(style)
+            return builder.build()
+        }
+    }
 }

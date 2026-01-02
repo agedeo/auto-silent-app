@@ -32,12 +32,15 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.android.gms.location.*
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.deluxeweb.silentmode.data.AppDatabase
 import nl.deluxeweb.silentmode.data.IgnoredLocation
+import nl.deluxeweb.silentmode.data.LocalDatabase // <--- ONZE NIEUWE DATABASE
+import nl.deluxeweb.silentmode.data.Promotion     // <--- VOOR TESTEN
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -47,8 +50,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lblLocation: TextView
     private lateinit var txtStatusIcon: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var btnOverride: MaterialButton
-    private lateinit var btnSettings: MaterialButton
+    private lateinit var toggleGroupMode: MaterialButtonToggleGroup
+    private lateinit var btnOpenSettings: MaterialButton
     private lateinit var btnIgnoreLocation: TextView
 
     private lateinit var geofencingClient: GeofencingClient
@@ -58,13 +61,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var liveLocationCallback: LocationCallback
     private var updateJob: Job? = null
 
-    private var isManualMode = false
+    private var currentMode = "AUTO"
     private var currentLocationId: Int = -1
 
-    // Ontvangt updates vanuit de achtergrond (Geofence events)
+    // Ontvangt updates van de GeofenceBroadcastReceiver (als de app in achtergrond draait)
     private val uiUpdateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent != null && !isManualMode) {
+            if (intent != null && currentMode == "AUTO") {
                 val mode = intent.getStringExtra("MODE")
                 val locNaam = intent.getStringExtra("LOC_NAAM") ?: "Onbekend"
                 val id = intent.getIntExtra("LOC_ID", -1)
@@ -93,54 +96,109 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
+        // Views koppelen
         rootLayout = findViewById(R.id.rootLayout)
         lblMode = findViewById(R.id.lblMode)
         lblLocation = findViewById(R.id.lblLocation)
         txtStatusIcon = findViewById(R.id.txtStatusIcon)
         progressBar = findViewById(R.id.progressBar)
-        btnOverride = findViewById(R.id.btnOverride)
-        btnSettings = findViewById(R.id.btnSettings)
+        toggleGroupMode = findViewById(R.id.toggleGroupMode)
+        btnOpenSettings = findViewById(R.id.btnOpenSettings)
         btnIgnoreLocation = findViewById(R.id.btnIgnoreLocation)
 
+        // Google Clients
         geofencingClient = LocationServices.getGeofencingClient(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geofenceHelper = GeofenceHelper(this)
 
         createLocationCallback()
 
-        btnSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
-        btnOverride.setOnClickListener { toggleManualMode() }
+        // Listeners
+        btnOpenSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        btnIgnoreLocation.setOnClickListener { ignoreCurrentLocation() }
 
-        txtStatusIcon.setOnClickListener {
-            if (isManualMode) toggleSilentStateManual()
-            else Toast.makeText(this, getString(R.string.loc_manual), Toast.LENGTH_SHORT).show()
+        toggleGroupMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                when (checkedId) {
+                    R.id.btnModeAuto -> setAppMode("AUTO")
+                    R.id.btnModeSound -> setAppMode("SOUND")
+                    R.id.btnModeSilent -> setAppMode("SILENT")
+                }
+            }
         }
 
-        btnIgnoreLocation.setOnClickListener { ignoreCurrentLocation() }
+        txtStatusIcon.setOnClickListener {
+            Toast.makeText(this, "Gebruik de knoppen hieronder om te wisselen.", Toast.LENGTH_SHORT).show()
+        }
 
         scheduleBackgroundWork()
         performAutomaticUpdate()
 
+        // UI Receiver registreren
         ContextCompat.registerReceiver(
-            this,
-            uiUpdateReceiver,
-            IntentFilter("UPDATE_UI_EVENT"),
-            ContextCompat.RECEIVER_NOT_EXPORTED
+            this, uiUpdateReceiver, IntentFilter("UPDATE_UI_EVENT"), ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
         checkPermissions()
+
+        // --- TIJDELIJKE TEST VOOR PROMOTIE ---
+        // Zet dit AAN als je wilt testen. Vervang 12345 door een ID dat je in de buurt hebt.
+        /*
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = LocalDatabase.getDatabase(applicationContext)
+            db.promotionDao().addPromotion(
+                Promotion(
+                    locationId = 12345,
+                    text = "🍿 Gratis Popcorn!",
+                    url = "https://www.pathe.nl"
+                )
+            )
+        }
+        */
     }
 
     override fun onResume() {
         super.onResume()
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        isManualMode = prefs.getBoolean("manual_override", false)
-        checkRealPhoneStatus()
+        val savedMode = prefs.getString("override_mode", "AUTO") ?: "AUTO"
 
+        when (savedMode) {
+            "AUTO" -> toggleGroupMode.check(R.id.btnModeAuto)
+            "SOUND" -> toggleGroupMode.check(R.id.btnModeSound)
+            "SILENT" -> toggleGroupMode.check(R.id.btnModeSilent)
+        }
+        setAppMode(savedMode)
         checkAndStartService()
+    }
 
-        if (!isManualMode) {
-            startLiveTracking()
+    private fun setAppMode(mode: String) {
+        currentMode = mode
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.edit().putString("override_mode", mode).apply()
+        prefs.edit().putBoolean("manual_override", mode != "AUTO").apply()
+
+        val mgr = SilentManager(this)
+
+        when (mode) {
+            "AUTO" -> {
+                startLiveTracking()
+                if (currentLocationId == -1) {
+                    updateDashboard(false, getString(R.string.loc_searching), null)
+                    SilentService.updateNotification(this, getString(R.string.notification_standby), R.drawable.ic_sound_on)
+                }
+            }
+            "SOUND" -> {
+                stopLiveTracking()
+                mgr.setNormalMode()
+                updateDashboard(false, "Handmatig: Geluid", null)
+                SilentService.updateNotification(this, "🔊 Geluid geforceerd AAN", R.drawable.ic_sound_on)
+            }
+            "SILENT" -> {
+                stopLiveTracking()
+                mgr.setSilentMode()
+                updateDashboard(true, "Handmatig: Stil", null)
+                SilentService.updateNotification(this, "🔕 Geluid geforceerd UIT", R.drawable.ic_sound_off)
+            }
         }
     }
 
@@ -157,43 +215,28 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkAndStartService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                return
-            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
         }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return
         val serviceIntent = Intent(this, SilentService::class.java)
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent)
-            } else {
-                startService(serviceIntent)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        try { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(serviceIntent) else startService(serviceIntent) } catch (e: Exception) { }
     }
 
     private fun createLocationCallback() {
         liveLocationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations) {
-                    processLocation(location)
-                }
+                for (location in locationResult.locations) processLocation(location)
             }
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun startLiveTracking() {
+        if (currentMode != "AUTO") return
         val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000)
             .setMinUpdateIntervalMillis(2000)
             .setWaitForAccurateLocation(false)
             .build()
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.requestLocationUpdates(request, liveLocationCallback, Looper.getMainLooper())
         }
@@ -205,27 +248,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // --- HIER ZIT DE NIEUWE LOGICA ---
     private fun processLocation(location: Location) {
+        if (currentMode != "AUTO") return
         if (updateJob?.isActive == true) return
 
         updateJob = lifecycleScope.launch(Dispatchers.IO) {
-            val db = AppDatabase.getDatabase(applicationContext)
+            val appDb = AppDatabase.getDatabase(applicationContext)   // DB 1: OSM Data (Wekelijks nieuw)
+            val localDb = LocalDatabase.getDatabase(applicationContext) // DB 2: User Data & Promos (Permanent)
+
             val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-
             val activeCats = prefs.getStringSet("active_categories", setOf("church", "theater"))?.toList() ?: emptyList()
-            val radiusStr = prefs.getString("geofence_radius", "80") ?: "80"
-            val radius = radiusStr.toFloatOrNull() ?: 80f
-            val ignoredIds = db.ignoredLocationDao().getAllIgnoredIds()
+            val radiusStr = prefs.getString("geofence_radius", "100") ?: "100"
+            val radius = radiusStr.toFloatOrNull() ?: 100f
 
-            val nearby = db.locationDao().getNearby(
+            // Haal genegeerde IDs uit LOKALE database
+            val ignoredIds = localDb.ignoredLocationDao().getAllIgnoredIds()
+
+            // Haal OSM locaties uit APP database
+            val nearby = appDb.locationDao().getNearby(
                 location.latitude - 0.005, location.latitude + 0.005,
                 location.longitude - 0.005, location.longitude + 0.005,
                 activeCats
             ).filter { loc ->
                 !ignoredIds.contains(loc.id) &&
                         !loc.name.isNullOrBlank() &&
-                        !loc.name.equals("Locatie", true) &&
-                        !loc.name.equals("Naamloos", true)
+                        !loc.name.equals("Locatie", true)
             }
 
             var closestZoneName: String? = null
@@ -248,57 +296,62 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            // Nu checken we op promo's (nog steeds in IO thread)
+            var promoText: String? = null
+            var promoUrl: String? = null
+
+            if (closestZoneId != -1) {
+                val promo = localDb.promotionDao().getPromotion(closestZoneId)
+                if (promo != null) {
+                    promoText = promo.text
+                    promoUrl = promo.url
+                }
+            }
+
             withContext(Dispatchers.Main) {
+                if (currentMode != "AUTO") return@withContext
+
                 val mgr = SilentManager(applicationContext)
 
                 if (closestZoneName != null) {
+                    // We zitten in een zone!
                     if (!mgr.isSilentActive() || currentLocationId != closestZoneId) {
-                        // 1. EERST TRILLEN (Dubbele 'tik-tik')
                         vibrateModern(applicationContext, longArrayOf(0, 200, 100, 200))
-
-                        // 2. DAN STIL
                         mgr.setSilentMode()
                         prefs.edit().putBoolean("state_active_by_app", true).apply()
 
                         currentLocationId = closestZoneId
                         updateDashboard(true, closestZoneName, closestZoneCategory)
 
-                        SilentService.updateNotification(applicationContext, "🔴 Stil bij: $closestZoneName", R.drawable.ic_sound_off)
+                        // Toon notificatie MET eventuele promo
+                        SilentService.updateNotification(
+                            applicationContext,
+                            "🔴 Stil bij: $closestZoneName",
+                            R.drawable.ic_sound_off,
+                            promoText,
+                            promoUrl
+                        )
                     }
                 } else {
-                    if (!isManualMode) {
-                        if (currentLocationId != -1 || mgr.isSilentActive()) {
-                            // 1. EERST GELUID AAN
-                            mgr.setNormalMode()
-                            prefs.edit().putBoolean("state_active_by_app", false).apply()
+                    // We zijn buiten bereik
+                    if (currentLocationId != -1 || mgr.isSilentActive()) {
+                        mgr.setNormalMode()
+                        prefs.edit().putBoolean("state_active_by_app", false).apply()
+                        vibrateModern(applicationContext, longArrayOf(0, 500))
 
-                            // 2. DAN TRILLEN (Lange zoem)
-                            vibrateModern(applicationContext, longArrayOf(0, 500))
+                        currentLocationId = -1
+                        updateDashboard(false, getString(R.string.loc_none), null)
 
-                            currentLocationId = -1
-                            updateDashboard(false, getString(R.string.loc_none), null)
-                            SilentService.updateNotification(applicationContext, "🟢 AutoStil is actief", R.drawable.ic_sound_on)
-                        }
+                        // Reset notificatie (geen promo)
+                        SilentService.updateNotification(
+                            applicationContext,
+                            getString(R.string.notification_standby),
+                            R.drawable.ic_sound_on,
+                            null, null
+                        )
                     }
                 }
             }
-        }
-    }
-
-    // --- DE NIEUWE TRILFUNCTIE (Zelfde als in Receiver) ---
-    private fun vibrateModern(context: Context, pattern: LongArray) {
-        try {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            val effect = VibrationEffect.createWaveform(pattern, -1)
-            val combinedEffect = CombinedVibration.createParallel(effect)
-
-            val attributes = VibrationAttributes.Builder()
-                .setUsage(VibrationAttributes.USAGE_ALARM)
-                .build()
-
-            vibratorManager.vibrate(combinedEffect, attributes)
-        } catch (e: Exception) {
-            // Geen trilmotor of fout
         }
     }
 
@@ -309,8 +362,10 @@ class MainActivity : AppCompatActivity() {
             .setMessage("Wil je dat 'AutoStil' hier nooit meer stil wordt?")
             .setPositiveButton("Ja, negeer") { _, _ ->
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val db = AppDatabase.getDatabase(applicationContext)
-                    db.ignoredLocationDao().ignore(IgnoredLocation(currentLocationId))
+                    // OOK HIER DE LOKALE DATABASE GEBRUIKEN
+                    val localDb = LocalDatabase.getDatabase(applicationContext)
+                    localDb.ignoredLocationDao().ignore(IgnoredLocation(currentLocationId))
+
                     withContext(Dispatchers.Main) {
                         val silentManager = SilentManager(applicationContext)
                         silentManager.setNormalMode()
@@ -318,7 +373,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(applicationContext, "Locatie genegeerd ✅", Toast.LENGTH_SHORT).show()
                         currentLocationId = -1
                         updateDashboard(false, getString(R.string.loc_none), null)
-                        SilentService.updateNotification(applicationContext, "🟢 AutoStil is actief", R.drawable.ic_sound_on)
+                        SilentService.updateNotification(applicationContext, getString(R.string.notification_standby), R.drawable.ic_sound_on)
                         loadGeofences()
                     }
                 }
@@ -326,30 +381,14 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("Annuleer", null).show()
     }
 
-    private fun toggleManualMode() {
-        isManualMode = !isManualMode
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("manual_override", isManualMode).apply()
-        val silentManager = SilentManager(this)
-        if (isManualMode) {
-            stopLiveTracking()
-            if (!silentManager.isSilentActive()) silentManager.setSilentMode()
-            checkRealPhoneStatus()
-        } else {
-            startLiveTracking()
-            Toast.makeText(this, getString(R.string.loading), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun toggleSilentStateManual() {
-        val silentManager = SilentManager(this)
-        if (silentManager.isSilentActive()) silentManager.setNormalMode() else silentManager.setSilentMode()
-        checkRealPhoneStatus()
-    }
-
-    private fun checkRealPhoneStatus() {
-        val silentManager = SilentManager(this)
-        val label = if(isManualMode) getString(R.string.loc_manual) else getString(R.string.loc_searching)
-        updateDashboard(silentManager.isSilentActive(), label, null)
+    private fun vibrateModern(context: Context, pattern: LongArray) {
+        try {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val effect = VibrationEffect.createWaveform(pattern, -1)
+            val combinedEffect = CombinedVibration.createParallel(effect)
+            val attributes = VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build()
+            vibratorManager.vibrate(combinedEffect, attributes)
+        } catch (e: Exception) { }
     }
 
     private fun updateDashboard(isSilent: Boolean, locationName: String, category: String?) {
@@ -359,39 +398,30 @@ class MainActivity : AppCompatActivity() {
         val colorNormalText = ContextCompat.getColor(this, R.color.status_normal_text)
         val colorSilentText = ContextCompat.getColor(this, R.color.status_silent_text)
         val colorManualText = ContextCompat.getColor(this, R.color.status_manual_text)
-        val colorButtonDark = ContextCompat.getColor(this, R.color.button_dark_bg)
 
-        if (isManualMode) {
+        if (currentMode != "AUTO") {
             btnIgnoreLocation.visibility = View.GONE
-            btnOverride.text = getString(R.string.btn_manual_stop)
-            btnOverride.setBackgroundColor(colorManualText)
-            lblLocation.text = getString(R.string.loc_manual)
-            lblLocation.setTextColor(colorManualText)
             rootLayout.setBackgroundColor(colorManualBg)
+            lblLocation.setTextColor(colorManualText)
 
-            if (isSilent) {
+            if (currentMode == "SILENT") {
                 lblMode.text = getString(R.string.status_forced_silent)
                 lblMode.setTextColor(colorManualText)
                 txtStatusIcon.text = "🔕"
+                lblLocation.text = "Handmatig: Stil"
             } else {
                 lblMode.text = getString(R.string.status_forced_sound)
                 lblMode.setTextColor(colorManualText)
                 txtStatusIcon.text = "🔊"
+                lblLocation.text = "Handmatig: Geluid"
             }
         } else {
-            btnOverride.text = getString(R.string.btn_manual_start)
-            btnOverride.setBackgroundColor(colorButtonDark)
-
             if (isSilent) {
-                if (currentLocationId != -1) btnIgnoreLocation.visibility = View.VISIBLE else btnIgnoreLocation.visibility = View.GONE
+                btnIgnoreLocation.visibility = View.VISIBLE
                 rootLayout.setBackgroundColor(colorSilentBg)
                 lblMode.text = getString(R.string.status_sound_off)
                 lblMode.setTextColor(colorSilentText)
-                if (locationName == getString(R.string.loc_searching) || locationName == getString(R.string.loc_manual)) {
-                    lblLocation.text = locationName
-                } else {
-                    lblLocation.text = getString(R.string.loc_at, locationName)
-                }
+                lblLocation.text = if (locationName == getString(R.string.loc_searching)) locationName else getString(R.string.loc_at, locationName)
                 lblLocation.setTextColor(colorSilentText)
 
                 val emoji = when(category) {
@@ -399,17 +429,11 @@ class MainActivity : AppCompatActivity() {
                     "theater" -> "🎭"
                     "library" -> "📚"
                     "cinema" -> "🍿"
-                    "museum" -> "🖼️"
-                    "community" -> "🤝"
-                    "cemetery" -> "🕯️"
-                    "hospital" -> "🏥"
-                    "government" -> "⚖️"
                     else -> "🔕"
                 }
                 txtStatusIcon.text = emoji
             } else {
                 btnIgnoreLocation.visibility = View.GONE
-                currentLocationId = -1
                 rootLayout.setBackgroundColor(colorNormalBg)
                 lblMode.text = getString(R.string.status_sound_on)
                 lblMode.setTextColor(colorNormalText)
@@ -450,42 +474,24 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private suspend fun addGeofencesAround(lat: Double, lon: Double) {
-        val db = AppDatabase.getDatabase(applicationContext)
-        val count = db.locationDao().getLocationCount()
-        if (count == 0) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(applicationContext, "Database herstellen... 🛠️", Toast.LENGTH_SHORT).show()
-                progressBar.visibility = View.VISIBLE
-            }
+        val appDb = AppDatabase.getDatabase(applicationContext)
+        val localDb = LocalDatabase.getDatabase(applicationContext)
 
+        // Check of database leeg is
+        if (appDb.locationDao().getLocationCount() == 0) {
             val manager = UpdateManager(applicationContext)
-            val result = manager.downloadUpdate(force = true)
-
-            withContext(Dispatchers.Main) {
-                progressBar.visibility = View.GONE
-                if (result == UpdateResult.SUCCESS) {
-                    Toast.makeText(applicationContext, "Herstel geslaagd! ✅", Toast.LENGTH_SHORT).show()
-                } else {
-                    return@withContext
-                }
-            }
-            if (result != UpdateResult.SUCCESS) return
+            if (manager.downloadUpdate(force = true) != UpdateResult.SUCCESS) return
         }
 
         val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val activeCats = prefs.getStringSet("active_categories", setOf("church", "theater"))?.toList() ?: emptyList()
-        val ignoredIds = db.ignoredLocationDao().getAllIgnoredIds()
 
-        val targets = db.locationDao().getNearby(
-            lat - 0.1, lat + 0.1,
-            lon - 0.1, lon + 0.1,
-            activeCats
-        ).filter { loc ->
-            !ignoredIds.contains(loc.id) &&
-                    !loc.name.isNullOrBlank() &&
-                    !loc.name.equals("Locatie", true) &&
-                    !loc.name.equals("Naamloos", true)
-        }.take(99)
+        // Gebruik LOKALE database voor genegeerde IDs
+        val ignoredIds = localDb.ignoredLocationDao().getAllIgnoredIds()
+
+        val targets = appDb.locationDao().getNearby(lat - 0.1, lat + 0.1, lon - 0.1, lon + 0.1, activeCats)
+            .filter { !ignoredIds.contains(it.id) && !it.name.isNullOrBlank() }
+            .take(99)
 
         if (targets.isEmpty()) return
 
@@ -495,7 +501,6 @@ class MainActivity : AppCompatActivity() {
         }.toMutableList()
 
         geofenceList.add(geofenceHelper.getUpdateGeofence(lat, lon))
-
         val request = geofenceHelper.getGeofencingRequest(geofenceList)
         val pendingIntent = geofenceHelper.geofencePendingIntent
 
@@ -504,48 +509,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-        checkAndStartService()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            checkBackgroundLocation()
-        } else {
-            loadGeofences()
-        }
-    }
-
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { checkAndStartService(); if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) checkBackgroundLocation() else loadGeofences() }
     private val requestBackgroundLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { if(it) loadGeofences() }
 
     private fun checkPermissions() {
         val permissionsToRequest = mutableListOf<String>()
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
             permissionsToRequest.add(Manifest.permission.ACCESS_COARSE_LOCATION)
         }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
-            }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
         }
-
-        if (permissionsToRequest.isNotEmpty()) {
-            requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
-        } else {
-            checkAndStartService()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                checkBackgroundLocation()
-            } else {
-                loadGeofences()
-            }
-        }
+        if (permissionsToRequest.isNotEmpty()) requestPermissionLauncher.launch(permissionsToRequest.toTypedArray()) else { checkAndStartService(); if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) checkBackgroundLocation() else loadGeofences() }
     }
 
     private fun checkBackgroundLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            loadGeofences()
-        } else {
-            requestBackgroundLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) loadGeofences() else requestBackgroundLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     }
 }

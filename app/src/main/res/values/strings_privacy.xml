@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privacy_title">Privacy &amp; Disclaimer</string>
+    <string name="privacy_full_text">
+        <b>1. Gebruik van Locatiegegevens</b>\n
+        Om te kunnen functioneren, heeft AutoStil toegang nodig tot de locatie van uw apparaat.\n
+        • <b>Wanneer:</b> De app gebruikt uw locatiegegevens ook als de app gesloten is of niet in gebruik is ("Achtergrondlocatie").\n
+        • <b>Waarom:</b> Dit is noodzakelijk voor de "Geofencing" functionaliteit. De app moet kunnen detecteren wanneer u een stilte-zone (zoals een kerk of theater) binnenloopt of verlaat om het geluid automatisch aan of uit te schakelen.\n
+        • <b>Opslag:</b> Uw exacte locatiegeschiedenis wordt <b>niet</b> opgeslagen en <b>niet</b> verstuurd naar onze servers. De locatiebepaling gebeurt lokaal op uw telefoon.\n\n
+
+        <b>2. Gegevensopslag</b>\n
+        AutoStil slaat de volgende gegevens <b>lokaal op uw apparaat</b> op:\n
+        • Instellingen: Uw voorkeuren voor straal, wachttijd en actieve categorieën.\n
+        • Genegeerde Locaties: Een lijst van specifieke zones waar u handmatig heeft aangegeven dat de app niet mag ingrijpen.\n
+        • Locatiedatabase: Een lijst met openbare coördinaten van stilte-zones.\n
+        • Promoties: Een lokaal opgeslagen lijst met actuele aanbiedingen gekoppeld aan locaties.\n
+        Deze gegevens verlaten uw telefoon nooit, tenzij u zelf een back-up maakt via het systeem van uw telefoon.\n\n
+
+        <b>3. Delen met Derden</b>\n
+        Wij verkopen, verhandelen of verhuren uw persoonlijke gegevens of locatiegegevens <b>niet</b> aan derden. De app maakt gebruik van Google Play Services voor de technische afhandeling van locatiebepaling.\n\n
+
+        <b>4. Lokale Promoties &amp; Links</b>\n
+        AutoStil kan op specifieke locaties (bijv. bioscopen) relevante informatie of aanbiedingen tonen in de notificatie.\n
+        • <b>Privacy:</b> Deze koppeling gebeurt volledig op uw telefoon. Wij weten niet welke aanbiedingen u ziet en wij delen uw locatie niet met de adverteerder.\n
+        • <b>Externe Links:</b> Als u klikt op "Bekijk Actie", verlaat u de app en opent u een website van een derde partij. Voor die websites geldt het privacybeleid van de betreffende aanbieder.\n\n
+
+        <b>5. Disclaimer &amp; Aansprakelijkheid</b>\n
+        AutoStil is een hulpmiddel. Hoewel wij ons uiterste best doen om de app zo nauwkeurig mogelijk te laten werken, zijn wij afhankelijk van externe factoren zoals GPS-signaal, batterijstatus en systeembeperkingen van Android.\n
+        • <b>Verantwoordelijkheid:</b> U blijft te allen tijde zelf eindverantwoordelijk voor de geluidsinstellingen van uw telefoon. Controleer in kritieke situaties (zoals een begrafenis of voorstelling) altijd handmatig of uw telefoon stil is.\n
+        • <b>Aansprakelijkheid:</b> De ontwikkelaars van AutoStil zijn niet aansprakelijk voor enige schade, gemiste oproepen, of ongemakken voortvloeiend uit het al dan niet functioneren van de app.\n\n
+
+        <b>6. Contact</b>\n
+        Heeft u vragen over dit privacybeleid? Neem contact op met de ontwikkelaar.
+    </string>
+</resources>
