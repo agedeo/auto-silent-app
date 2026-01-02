@@ -1,49 +1,83 @@
 package nl.deluxeweb.silentmode
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 
 class SilentService : Service() {
 
-    override fun onCreate() {
-        super.onCreate()
-        startForegroundService()
+    companion object {
+        const val CHANNEL_ID = "autostil_foreground_channel"
+        const val NOTIFICATION_ID = 1337
+
+        // CENTRALE FUNCTIE: Deze regelt de updates vanuit de hele app
+        fun updateNotification(context: Context, text: String, iconRes: Int) {
+            // 1. Opslaan in geheugen (zodat hij na herstart bewaard blijft)
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            prefs.edit()
+                .putString("last_notif_text", text)
+                .putInt("last_notif_icon", iconRes)
+                .apply()
+
+            // 2. Direct de melding updaten
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setContentTitle("AutoStil")
+                .setContentText(text)
+                .setSmallIcon(iconRes)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+                .build()
+
+            notificationManager.notify(NOTIFICATION_ID, notification)
+        }
     }
 
-    private fun startForegroundService() {
-        val channelId = "autostil_foreground_channel"
-        val channelName = "AutoStil Achtergrond Service"
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(channel)
-        }
-
-        val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("AutoStil is actief")
-            .setContentText("We houden de wacht op de achtergrond 🌍")
-            .setSmallIcon(R.drawable.ic_sound_on) // Zorg dat dit icoon bestaat
-            .setOngoing(true)
-            .build()
-
-        // ID 1 voor de permanente notificatie
-        startForeground(1, notification)
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // START_STICKY zorgt dat Android de service herstart als hij crasht
+        // AANGEPAST: Lees eerst de laatst bekende status!
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val savedText = prefs.getString("last_notif_text", "🟢 AutoStil is actief")
+        val savedIcon = prefs.getInt("last_notif_icon", R.drawable.ic_sound_on)
+
+        // Bouw de notificatie met de OPGESLAGEN tekst
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("AutoStil")
+            .setContentText(savedText)
+            .setSmallIcon(savedIcon)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .build()
+
+        if (Build.VERSION.SDK_INT >= 29) {
+            startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+        } else {
+            startForeground(NOTIFICATION_ID, notification)
+        }
+
         return START_STICKY
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(CHANNEL_ID, "AutoStil Status", NotificationManager.IMPORTANCE_LOW)
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+        }
     }
+
+    override fun onBind(intent: Intent?): IBinder? = null
 }

@@ -19,7 +19,12 @@ interface LocationDao {
     @Query("SELECT * FROM locations")
     suspend fun getAllLocations(): List<SilentLocation>
 
-    // NIEUW: Haal specifiek één locatie op (voor de categorie check op dashboard)
+    // NIEUW: Haal specifiek één locatie op
     @Query("SELECT * FROM locations WHERE id = :id LIMIT 1")
     suspend fun getLocationById(id: Int): SilentLocation?
+
+    // NIEUW: Tel hoeveel locaties er in totaal zijn (voor debug/status check)
+    // Dit lost de 'Unresolved reference' fout op.
+    @Query("SELECT COUNT(*) FROM locations")
+    suspend fun getLocationCount(): Int
 }

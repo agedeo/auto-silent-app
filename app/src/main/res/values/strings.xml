@@ -36,4 +36,17 @@
     <string name="notif_enter_text">Telefoon op stil gezet bij: %1$s</string>
     <string name="notif_exit_title">Vrijheid 🔊</string>
     <string name="notif_exit_text">Je hebt %1$s verlaten. Geluid weer aan.</string>
+
+    <string name="cat_church">⛪ Religie (Kerken/Moskeeën)</string>
+    <string name="cat_theater">🎭 Theaters &amp; Podia</string>
+    <string name="cat_cinema">🍿 Bioscopen</string>
+    <string name="cat_library">📚 Bibliotheken</string>
+    <string name="cat_museum">🖼️ Musea</string>
+    <string name="cat_community">🤝 Buurthuizen</string>
+    <string name="cat_cemetery">🕯️ Begraafplaatsen &amp; Uitvaart</string>
+    <string name="cat_hospital">🏥 Ziekenhuizen</string>
+    <string name="cat_government">⚖️ Overheid (Rechtbank/Gemeente)</string>
+
+    <string name="pref_cat_title">Actieve Categorieën</string>
+    <string name="pref_cat_summary">Kies waar je telefoon stil moet worden</string>
 </resources>

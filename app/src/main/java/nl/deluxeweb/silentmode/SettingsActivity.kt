@@ -18,6 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -115,13 +116,11 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    // --- VERBETERDE LOCATIE FUNCTIE ---
     @SuppressLint("MissingPermission")
     private fun startLiveLocation() {
         val txtCoords = findViewById<TextView>(R.id.txtCoords)
         val txtAddress = findViewById<TextView>(R.id.txtAddress)
 
-        // Check permissie
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             txtCoords.text = "Geen toestemming"
             return
@@ -129,17 +128,13 @@ class SettingsActivity : AppCompatActivity() {
 
         val client = LocationServices.getFusedLocationProviderClient(this)
 
-        // STAP 1: Probeer direct de laatst bekende locatie (Snel!)
         client.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
                 updateLocationUI(location, txtCoords, txtAddress)
             }
         }
 
-        // STAP 2: Probeer een verse update (Nauwkeuriger, maar trager)
-        // We gebruiken een CancellationToken om te voorkomen dat hij oneindig blijft hangen
         val cancellationTokenSource = CancellationTokenSource()
-
         client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token)
             .addOnSuccessListener { location ->
                 if (location != null) {
@@ -147,19 +142,15 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener {
-                // Als dit faalt, hebben we hopelijk stap 1 al laten zien.
-                // Als stap 1 ook leeg was, tonen we nu pas een foutmelding.
                 if (txtCoords.text == getString(R.string.gps_searching)) {
                     txtCoords.text = "Locatie niet gevonden (Ga even naar buiten?)"
                 }
             }
     }
 
-    // Hulpmethode om UI te updaten en adres te zoeken in de achtergrond
     private fun updateLocationUI(location: Location, txtCoords: TextView, txtAddress: TextView) {
         txtCoords.text = "GPS: ${location.latitude}, ${location.longitude}"
 
-        // Adres zoeken doen we in een Coroutine (Achtergrond) zodat de UI niet bevriest
         lifecycleScope.launch(Dispatchers.IO) {
             var addressText = getString(R.string.address_unknown)
             try {
@@ -180,11 +171,9 @@ class SettingsActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                // Geocoder kan falen als er geen internet is
                 addressText = "📍 Adres niet gevonden (Geen internet?)"
             }
 
-            // Terug naar de UI thread om de tekst te zetten
             withContext(Dispatchers.Main) {
                 txtAddress.text = addressText
             }
@@ -194,6 +183,40 @@ class SettingsActivity : AppCompatActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+
+            // 1. Wizard Herstarten
+            findPreference<Preference>("restart_wizard")?.setOnPreferenceClickListener {
+                val intent = Intent(requireContext(), WizardActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                true
+            }
+
+            // 2. Database Update
+            findPreference<Preference>("update_db")?.setOnPreferenceClickListener {
+                Toast.makeText(requireContext(), "Controleren op updates...", Toast.LENGTH_SHORT).show()
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val manager = UpdateManager(requireContext())
+                    // AANGEPAST: We gebruiken nu 'result' (enum) in plaats van 'success' (boolean)
+                    val result = manager.downloadUpdate(force = false)
+
+                    withContext(Dispatchers.Main) {
+                        when(result) {
+                            UpdateResult.SUCCESS -> {
+                                Toast.makeText(requireContext(), "Nieuwe locaties gedownload! ✅", Toast.LENGTH_LONG).show()
+                            }
+                            UpdateResult.UP_TO_DATE -> {
+                                Toast.makeText(requireContext(), "Je bent al helemaal bij! 👍", Toast.LENGTH_SHORT).show()
+                            }
+                            UpdateResult.FAILED -> {
+                                Toast.makeText(requireContext(), "Update mislukt. Check je internet. ❌", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                }
+                true
+            }
         }
     }
 }

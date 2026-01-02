@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/app_background"
-    android:gravity="center_horizontal">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/lblStepTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welkom"
-        android:textSize="28sp"
+        android:layout_gravity="center_horizontal"
+        android:text="Stap 1/4"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/text_primary"
-        android:layout_marginBottom="32dp"
-        android:layout_marginTop="32dp"/>
+        android:layout_marginBottom="16dp"/>
 
     <ViewFlipper
         android:id="@+id/viewFlipper"
@@ -25,58 +21,236 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center">
-            <ImageView android:src="@drawable/ic_sound_on" android:layout_width="100dp" android:layout_height="100dp" android:layout_marginBottom="24dp" app:tint="@color/text_secondary"/>
-            <TextView android:text="Deze app zet je telefoon automatisch op stil in kerken, theaters en bioscopen.\n\nOm dit te kunnen doen, hebben we een paar keer jouw toestemming nodig." android:textSize="16sp" android:textAlignment="center" android:textColor="@color/text_primary" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@mipmap/ic_launcher_round"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welkom bij AutoStil"
+                android:textSize="24sp"
+                android:layout_marginTop="16dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="We gaan je helpen alles in te stellen."
+                android:layout_marginTop="8dp"/>
         </LinearLayout>
 
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center">
-            <ImageView android:id="@+id/imgStateLoc" android:src="@android:drawable/ic_delete" android:layout_width="80dp" android:layout_height="80dp" android:layout_marginBottom="24dp" app:tint="#E53935"/>
-            <TextView android:text="Stap 1: Waar ben je?" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_marginBottom="8dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="We moeten weten wanneer je een gebouw binnenloopt.\n\nKies in het volgende scherm voor:\n'Altijd toestaan' (Allow all the time)." android:textAlignment="center" android:textColor="@color/text_primary" android:layout_marginBottom="24dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <Button android:id="@+id/btnGrantLocation" android:text="Geef Toegang" android:backgroundTint="#2196F3" android:textColor="@android:color/white" android:layout_width="match_parent" android:layout_height="60dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/imgStateLoc"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@android:drawable/ic_dialog_map"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Locatie Toestemming"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Om te weten wanneer je in de bioscoop bent, hebben we je locatie nodig. Kies 'Altijd toestaan' indien gevraagd."
+                android:gravity="center"
+                android:layout_margin="16dp"/>
+            <Button
+                android:id="@+id/btnGrantLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Geef Toegang"/>
         </LinearLayout>
 
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center">
-            <ImageView android:id="@+id/imgStateDnd" android:src="@android:drawable/ic_delete" android:layout_width="80dp" android:layout_height="80dp" android:layout_marginBottom="24dp" app:tint="#E53935"/>
-            <TextView android:text="Stap 2: Geluid dempen" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_marginBottom="8dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="Android staat niet toe dat apps zomaar het geluid uitzetten.\n\nZoek in de lijst naar 'Silent Mode' en zet het schakelaartje AAN." android:textAlignment="center" android:textColor="@color/text_primary" android:layout_marginBottom="24dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <Button android:id="@+id/btnGrantDND" android:text="Open Instellingen" android:backgroundTint="#2196F3" android:textColor="@android:color/white" android:layout_width="match_parent" android:layout_height="60dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/imgStateDnd"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_sound_off"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Niet Storen Toegang"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="De app moet toestemming hebben om je telefoon op 'Niet Storen' te zetten."
+                android:gravity="center"
+                android:layout_margin="16dp"/>
+            <Button
+                android:id="@+id/btnGrantDND"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Open Instellingen"/>
         </LinearLayout>
 
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center">
-            <ImageView android:id="@+id/imgStateBat" android:src="@android:drawable/ic_delete" android:layout_width="80dp" android:layout_height="80dp" android:layout_marginBottom="24dp" app:tint="#E53935"/>
-            <TextView android:text="Stap 3: Wakker blijven" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_marginBottom="8dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            <TextView android:text="Telefoons zetten apps graag uit om stroom te besparen. Dan werkt de locatie-detectie niet meer.\n\nKlik op 'Toestaan' in het schermpje." android:textAlignment="center" android:textColor="@color/text_primary" android:layout_marginBottom="24dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <Button android:id="@+id/btnIgnoreBattery" android:text="Voorkom Slapen" android:backgroundTint="#2196F3" android:textColor="@android:color/white" android:layout_width="match_parent" android:layout_height="60dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+                android:id="@+id/imgStateBat"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@android:drawable/ic_lock_idle_charging"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Achtergrond Gebruik"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Android sluit apps graag af om stroom te besparen. Zet batterijbesparing UIT voor deze app."
+                android:gravity="center"
+                android:layout_margin="16dp"/>
+            <Button
+                android:id="@+id/btnIgnoreBattery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voorkom Slapen"/>
         </LinearLayout>
 
-        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center_horizontal">
-            <TextView android:text="Welke locaties?" android:textStyle="bold" android:textColor="@color/text_primary" android:layout_marginBottom="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="20dp">
 
-            <CheckBox android:id="@+id/chkChurch" android:text="Kerken &amp; Religie" android:textColor="@color/text_primary" android:checked="true" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <CheckBox android:id="@+id/chkTheater" android:text="Theaters &amp; Concertzalen" android:textColor="@color/text_primary" android:checked="true" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <CheckBox android:id="@+id/chkLibrary" android:text="Bibliotheken" android:textColor="@color/text_primary" android:checked="true" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <CheckBox android:id="@+id/chkCinema" android:text="Bioscopen" android:textColor="@color/text_primary" android:checked="true" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Waar wil je stilte?"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
-            <TextView android:text="Vertraging (tegen langsrijden):" android:textColor="@color/text_primary" android:layout_marginTop="24dp" android:layout_marginBottom="4dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <Spinner android:id="@+id/spinnerDelay" android:entries="@array/delay_entries" android:minHeight="48dp" android:background="@android:drawable/btn_dropdown" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <CheckBox
+                    android:id="@+id/chkTheater"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/cat_theater"/>
+                <CheckBox
+                    android:id="@+id/chkCinema"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/cat_cinema"/>
+                <CheckBox
+                    android:id="@+id/chkLibrary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/cat_library"/>
+                <CheckBox
+                    android:id="@+id/chkChurch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/cat_church"/>
+                <CheckBox
+                    android:id="@+id/chkCemetery"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/cat_cemetery"/>
 
-            <TextView android:text="Afstand (Grootte cirkel):" android:textColor="@color/text_primary" android:layout_marginTop="16dp" android:layout_marginBottom="4dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            <Spinner android:id="@+id/spinnerRadius" android:entries="@array/radius_entries" android:minHeight="48dp" android:background="@android:drawable/btn_dropdown" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Optioneel (Standaard Uit):"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"/>
 
-        </LinearLayout>
+                <CheckBox
+                    android:id="@+id/chkMuseum"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="@string/cat_museum"/>
+                <CheckBox
+                    android:id="@+id/chkHospital"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="@string/cat_hospital"/>
+                <CheckBox
+                    android:id="@+id/chkCommunity"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="@string/cat_community"/>
+                <CheckBox
+                    android:id="@+id/chkGovernment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="@string/cat_government"/>
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Overig:"
+                    android:textStyle="bold"
+                    android:layout_marginTop="16dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Straal:"
+                    android:layout_marginTop="8dp"/>
+                <Spinner
+                    android:id="@+id/spinnerRadius"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/radius_values"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Wachttijd (minuten):"
+                    android:layout_marginTop="8dp"/>
+                <Spinner
+                    android:id="@+id/spinnerDelay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/delay_values"/>
+
+            </LinearLayout>
+        </ScrollView>
     </ViewFlipper>
 
     <Button
         android:id="@+id/btnNext"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Starten"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
-        android:backgroundTint="#4CAF50"
+        android:layout_height="wrap_content"
+        android:text="Volgende"
         android:layout_marginTop="16dp"/>
 
 </LinearLayout>

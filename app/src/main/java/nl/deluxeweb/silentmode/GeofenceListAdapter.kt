@@ -7,19 +7,20 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nl.deluxeweb.silentmode.data.SilentLocation
 
-data class LocationWithDistance(
+// Hulpklasse voor de lijst
+data class LocationItem(
     val location: SilentLocation,
-    val distanceMeters: Float,
     val distanceText: String
 )
 
-class GeofenceListAdapter(private var items: List<LocationWithDistance>) :
+class GeofenceListAdapter(private var locations: List<LocationItem>) :
     RecyclerView.Adapter<GeofenceListAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val txtName: TextView = view.findViewById(R.id.txtName)
-        val txtDistance: TextView = view.findViewById(R.id.txtDistance)
-        val txtRowIcon: TextView = view.findViewById(R.id.txtRowIcon) // <--- Aangepast naar TextView
+        val name: TextView = view.findViewById(R.id.txtName)
+        val cat: TextView = view.findViewById(R.id.txtCat)
+        val dist: TextView = view.findViewById(R.id.txtDist)
+        val icon: TextView = view.findViewById(R.id.txtIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,25 +30,32 @@ class GeofenceListAdapter(private var items: List<LocationWithDistance>) :
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        holder.txtName.text = item.location.name ?: "Naamloos"
-        holder.txtDistance.text = item.distanceText
+        val item = locations[position]
+        val loc = item.location
 
-        // EMOJI LOGICA
-        val emoji = when (item.location.category) {
+        holder.name.text = loc.name
+        holder.cat.text = loc.category
+        holder.dist.text = item.distanceText
+
+        val emoji = when(loc.category) {
             "church" -> "⛪"
             "theater" -> "🎭"
             "library" -> "📚"
             "cinema" -> "🍿"
+            "museum" -> "🖼️"
+            "community" -> "🤝"
+            "cemetery" -> "🕯️"
+            "hospital" -> "🏥"
+            "government" -> "⚖️"
             else -> "📍"
         }
-        holder.txtRowIcon.text = emoji
+        holder.icon.text = emoji
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount() = locations.size
 
-    fun updateList(newItems: List<LocationWithDistance>) {
-        items = newItems
+    fun updateList(newList: List<LocationItem>) {
+        locations = newList
         notifyDataSetChanged()
     }
 }

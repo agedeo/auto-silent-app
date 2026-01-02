@@ -1,47 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="category_names">
-        <item>Kerken &amp; Religie</item>
-        <item>Theaters &amp; Concertzalen</item>
-        <item>Bibliotheken</item>
-        <item>Bioscopen</item>
-    </string-array>
-    <string-array name="category_values">
-        <item>church</item>
-        <item>theater</item>
-        <item>library</item>
-        <item>cinema</item>
+    <string-array name="cat_entries">
+        <item>@string/cat_church</item>
+        <item>@string/cat_theater</item>
+        <item>@string/cat_cinema</item>
+        <item>@string/cat_library</item>
+        <item>@string/cat_cemetery</item>
+        <item>@string/cat_museum</item>
+        <item>@string/cat_community</item>
+        <item>@string/cat_hospital</item>
+        <item>@string/cat_government</item>
     </string-array>
 
-    <string-array name="delay_entries">
-        <item>Direct (0 sec)</item>
-        <item>Kort (30 sec)</item>
-        <item>Normaal (1 min)</item>
-        <item>Lang (2 min)</item>
-    </string-array>
-    <string-array name="delay_values">
-        <item>0</item>
-        <item>30000</item>
-        <item>60000</item>
-        <item>120000</item>
+    <string-array name="cat_values">
+        <item>church</item>
+        <item>theater</item>
+        <item>cinema</item>
+        <item>library</item>
+        <item>cemetery</item>
+        <item>museum</item>
+        <item>community</item>
+        <item>hospital</item>
+        <item>government</item>
     </string-array>
 
     <string-array name="radius_entries">
-        <item>Klein (50 meter)</item>
-        <item>Normaal (80 meter)</item>
-        <item>Groot (150 meter)</item>
-    </string-array>
-    <string-array name="radius_values">
-        <item>50</item>
-        <item>80</item>
-        <item>150</item>
+        <item>50 meter</item>
+        <item>100 meter</item>
+        <item>150 meter</item>
+        <item>200 meter</item>
     </string-array>
 
-    <string-array name="silent_mode_entries">
-        <item>Alleen Prioriteit</item>
-        <item>Totale Stilte</item>
+    <string-array name="radius_values">
+        <item>50</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200</item>
     </string-array>
-    <string-array name="silent_mode_values">
-        <item>priority</item>
-        <item>none</item>
+
+    <string-array name="delay_entries">
+        <item>Direct (0 min)</item>
+        <item>1 minuut</item>
+        <item>2 minuten</item>
+        <item>5 minuten</item>
+    </string-array>
+
+    <string-array name="delay_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>5</item>
     </string-array>
 </resources>

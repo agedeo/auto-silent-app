@@ -32,10 +32,17 @@ class WizardActivity : AppCompatActivity() {
     private lateinit var imgStateBat: ImageView
     private lateinit var btnIgnoreBattery: Button
 
+    // Checkboxes voor Categorieën
     private lateinit var chkChurch: CheckBox
     private lateinit var chkTheater: CheckBox
     private lateinit var chkLibrary: CheckBox
     private lateinit var chkCinema: CheckBox
+    private lateinit var chkMuseum: CheckBox
+    private lateinit var chkCommunity: CheckBox
+    private lateinit var chkCemetery: CheckBox
+    private lateinit var chkHospital: CheckBox
+    private lateinit var chkGovernment: CheckBox
+
     private lateinit var spinnerDelay: Spinner
     private lateinit var spinnerRadius: Spinner
 
@@ -61,14 +68,21 @@ class WizardActivity : AppCompatActivity() {
         btnIgnoreBattery = findViewById(R.id.btnIgnoreBattery)
         btnIgnoreBattery.setOnClickListener { askBattery() }
 
+        // Binden van Checkboxes
         chkChurch = findViewById(R.id.chkChurch)
         chkTheater = findViewById(R.id.chkTheater)
         chkLibrary = findViewById(R.id.chkLibrary)
         chkCinema = findViewById(R.id.chkCinema)
+        chkMuseum = findViewById(R.id.chkMuseum)
+        chkCommunity = findViewById(R.id.chkCommunity)
+        chkCemetery = findViewById(R.id.chkCemetery)
+        chkHospital = findViewById(R.id.chkHospital)
+        chkGovernment = findViewById(R.id.chkGovernment)
+
         spinnerDelay = findViewById(R.id.spinnerDelay)
         spinnerRadius = findViewById(R.id.spinnerRadius)
 
-        spinnerRadius.setSelection(1)
+        spinnerRadius.setSelection(1) // Default op 100m
 
         btnNext.setOnClickListener { if (currentStep == 4) finishWizard() else nextStep() }
         updateUI()
@@ -207,11 +221,19 @@ class WizardActivity : AppCompatActivity() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val editor = prefs.edit()
 
+        // Sla actieve categorieën op als Set
+        // Let op: De strings hier moeten exact matchen met builder.py
         val activeCats = mutableSetOf<String>()
         if (chkChurch.isChecked) activeCats.add("church")
         if (chkTheater.isChecked) activeCats.add("theater")
         if (chkLibrary.isChecked) activeCats.add("library")
         if (chkCinema.isChecked) activeCats.add("cinema")
+        if (chkMuseum.isChecked) activeCats.add("museum")
+        if (chkCommunity.isChecked) activeCats.add("community")
+        if (chkCemetery.isChecked) activeCats.add("cemetery")
+        if (chkHospital.isChecked) activeCats.add("hospital")
+        if (chkGovernment.isChecked) activeCats.add("government")
+
         editor.putStringSet("active_categories", activeCats)
 
         val delayValues = resources.getStringArray(R.array.delay_values)

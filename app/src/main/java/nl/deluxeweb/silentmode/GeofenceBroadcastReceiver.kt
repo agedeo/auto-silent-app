@@ -1,13 +1,12 @@
 package nl.deluxeweb.silentmode
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import android.os.CombinedVibration
+import android.os.VibrationAttributes // <--- DIT IS DE NIEUWE KLASSE
+import android.os.VibrationEffect
+import android.os.VibratorManager
 import androidx.preference.PreferenceManager
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -28,6 +27,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val transition = geofencingEvent.geofenceTransition
         val triggeringGeofences = geofencingEvent.triggeringGeofences ?: return
 
+        // 1. Magic Fence Check
         for (fence in triggeringGeofences) {
             if (fence.requestId == "MAGIC_UPDATE_FENCE" && transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                 val workRequest = OneTimeWorkRequestBuilder<BackgroundWorker>().build()
@@ -36,55 +36,67 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             }
         }
 
+        // 2. Normale Geofences
         val rawId = triggeringGeofences.first().requestId
         val parts = rawId.split("|")
         val locationId = if (parts.isNotEmpty()) parts[0].toIntOrNull() ?: -1 else -1
         val locationName = if (parts.size > 1) parts[1] else "Locatie"
 
-        // EXTRA BEVEILIGING: NEGEER NAAMLOZE LOCATIES
         if (locationName.equals("Locatie", ignoreCase = true) || locationName.equals("Naamloos", ignoreCase = true)) {
             return
         }
 
         val silentManager = SilentManager(context)
         val uiUpdateIntent = Intent("UPDATE_UI_EVENT")
+        uiUpdateIntent.setPackage(context.packageName)
 
         when (transition) {
             Geofence.GEOFENCE_TRANSITION_ENTER, Geofence.GEOFENCE_TRANSITION_DWELL -> {
+                // ACTIE 1: TRILLEN
+                vibrateModern(context, longArrayOf(0, 200, 100, 200))
+
+                // ACTIE 2: STIL
                 silentManager.setSilentMode()
-                stuurNotificatie(context, context.getString(R.string.notif_enter_title), context.getString(R.string.notif_enter_text, locationName))
+                prefs.edit().putBoolean("state_active_by_app", true).apply()
+
+                SilentService.updateNotification(context, "🔴 Stil bij: $locationName", R.drawable.ic_sound_off)
+
                 uiUpdateIntent.putExtra("MODE", "SILENT")
                 uiUpdateIntent.putExtra("LOC_NAAM", locationName)
                 uiUpdateIntent.putExtra("LOC_ID", locationId)
             }
             Geofence.GEOFENCE_TRANSITION_EXIT -> {
+                // ACTIE 1: GELUID AAN
                 silentManager.setNormalMode()
-                stuurNotificatie(context, context.getString(R.string.notif_exit_title), context.getString(R.string.notif_exit_text, locationName))
+                prefs.edit().putBoolean("state_active_by_app", false).apply()
+
+                // ACTIE 2: TRILLEN
+                vibrateModern(context, longArrayOf(0, 500))
+
+                SilentService.updateNotification(context, "🟢 AutoStil is actief", R.drawable.ic_sound_on)
+
                 uiUpdateIntent.putExtra("MODE", "NORMAL")
             }
         }
-        LocalBroadcastManager.getInstance(context).sendBroadcast(uiUpdateIntent)
+
+        context.sendBroadcast(uiUpdateIntent)
     }
 
-    private fun stuurNotificatie(context: Context, titel: String, tekst: String) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "silent_mode_channel"
+    private fun vibrateModern(context: Context, pattern: LongArray) {
+        try {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            val effect = VibrationEffect.createWaveform(pattern, -1)
+            val combinedEffect = CombinedVibration.createParallel(effect)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (notificationManager.getNotificationChannel(channelId) == null) {
-                val channel = NotificationChannel(channelId, context.getString(R.string.notif_channel_name), NotificationManager.IMPORTANCE_HIGH)
-                notificationManager.createNotificationChannel(channel)
-            }
+            // DE FIX: Gebruik VibrationAttributes i.p.v. AudioAttributes
+            val attributes = VibrationAttributes.Builder()
+                .setUsage(VibrationAttributes.USAGE_ALARM) // Dit forceert trillen, ook in stiltemodus
+                .build()
+
+            vibratorManager.vibrate(combinedEffect, attributes)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_lock_silent_mode_off)
-            .setContentTitle(titel)
-            .setContentText(tekst)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
 }
