@@ -1,0 +1,28 @@
+<resources>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="app_background">#000000</color>
+    <color name="card_background">#1C1C1C</color>
+
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#E0E0E0</color>
+
+    <color name="status_normal_bg">#000000</color>
+    <color name="status_silent_bg">#1A1A1A</color>
+    <color name="status_manual_bg">#3E2723</color>
+
+    <color name="status_normal_text">#00E676</color>
+    <color name="status_silent_text">#80D8FF</color>
+    <color name="status_manual_text">#FFAB40</color>
+
+    <color name="color_success">#00E676</color>
+    <color name="color_error">#FF5252</color>
+    <color name="color_warning">#FFD740</color>
+
+    <color name="button_dark_bg">#333333</color>
+</resources>

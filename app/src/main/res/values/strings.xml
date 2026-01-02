@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">AutoStil</string>
+
+    <string name="title_activity_settings">Instellingen</string>
+    <string name="btn_back">Terug</string>
+    <string name="loading">Even geduld...</string>
+
+    <string name="status_sound_on">GELUID AAN</string>
+    <string name="status_sound_off">STILTEMODUS</string>
+    <string name="status_forced_sound">HANDMATIG AAN</string>
+    <string name="status_forced_silent">HANDMATIG STIL</string>
+
+    <string name="loc_searching">Locatie zoeken...</string>
+    <string name="loc_none">Geen stille plek in de buurt</string>
+    <string name="loc_at">Je bent bij: %1$s</string>
+    <string name="loc_manual">⚠️ HANDBEDIENING</string>
+
+    <string name="btn_manual_start">Zelf regelen ✋</string>
+    <string name="btn_manual_stop">Weer automatisch 🔄</string>
+
+    <string name="settings_header_check">Systeem Controle</string>
+    <string name="check_location_ok">✅ Locatie werkt goed</string>
+    <string name="check_location_bad">❌ Locatie toegang ontbreekt</string>
+    <string name="check_dnd_ok">✅ App mag geluid dempen</string>
+    <string name="check_dnd_bad">❌ App mag geluid NIET dempen</string>
+    <string name="check_bat_ok">✅ Batterij staat goed ingesteld</string>
+    <string name="check_bat_bad">⚠️ Let op: Batterij besparing staat aan</string>
+
+    <string name="settings_header_location">Waar ben ik?</string>
+    <string name="address_unknown">Adres onbekend</string>
+    <string name="gps_searching">GPS signaal zoeken...</string>
+    <string name="btn_show_list">Bekijk opgeslagen plekken 📍</string>
+
+    <string name="notif_channel_name">Stilte Meldingen</string>
+    <string name="notif_enter_title">Sssst! 🤫</string>
+    <string name="notif_enter_text">Telefoon op stil gezet bij: %1$s</string>
+    <string name="notif_exit_title">Vrijheid 🔊</string>
+    <string name="notif_exit_text">Je hebt %1$s verlaten. Geluid weer aan.</string>
+</resources>

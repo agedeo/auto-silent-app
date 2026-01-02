@@ -1,0 +1,42 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Voorkeuren">
+        <MultiSelectListPreference
+            app:key="active_categories"
+            app:title="Actieve Categorieën"
+            app:summary="Kies welke locaties het geluid moeten dempen"
+            app:entries="@array/category_names"
+            app:entryValues="@array/category_values"
+            app:defaultValue="@array/category_values" />
+
+        <ListPreference
+            app:key="loitering_delay"
+            app:title="Vertraging"
+            app:summary="Wacht even voordat stilte activeert (tegen langsrijden)"
+            app:defaultValue="0"
+            app:entries="@array/delay_entries"
+            app:entryValues="@array/delay_values"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Gedrag">
+        <ListPreference
+            app:key="silent_mode_type"
+            app:title="Type Stiltemodus"
+            app:summary="Kies hoe streng de stilte moet zijn"
+            app:defaultValue="priority"
+            app:entries="@array/silent_mode_entries"
+            app:entryValues="@array/silent_mode_values"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <ListPreference
+        app:key="geofence_radius"
+        app:title="Grootte van de zone"
+        app:summary="Hoe dichtbij moet je zijn?"
+        app:defaultValue="80"
+        app:entries="@array/radius_entries"
+        app:entryValues="@array/radius_values"
+        app:useSimpleSummaryProvider="true" />
+
+</PreferenceScreen>

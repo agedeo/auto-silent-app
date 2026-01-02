@@ -1,0 +1,47 @@
+<resources>
+    <string-array name="category_names">
+        <item>Kerken &amp; Religie</item>
+        <item>Theaters &amp; Concertzalen</item>
+        <item>Bibliotheken</item>
+        <item>Bioscopen</item>
+    </string-array>
+    <string-array name="category_values">
+        <item>church</item>
+        <item>theater</item>
+        <item>library</item>
+        <item>cinema</item>
+    </string-array>
+
+    <string-array name="delay_entries">
+        <item>Direct (0 sec)</item>
+        <item>Kort (30 sec)</item>
+        <item>Normaal (1 min)</item>
+        <item>Lang (2 min)</item>
+    </string-array>
+    <string-array name="delay_values">
+        <item>0</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>120000</item>
+    </string-array>
+
+    <string-array name="radius_entries">
+        <item>Klein (50 meter)</item>
+        <item>Normaal (80 meter)</item>
+        <item>Groot (150 meter)</item>
+    </string-array>
+    <string-array name="radius_values">
+        <item>50</item>
+        <item>80</item>
+        <item>150</item>
+    </string-array>
+
+    <string-array name="silent_mode_entries">
+        <item>Alleen Prioriteit</item>
+        <item>Totale Stilte</item>
+    </string-array>
+    <string-array name="silent_mode_values">
+        <item>priority</item>
+        <item>none</item>
+    </string-array>
+</resources>
